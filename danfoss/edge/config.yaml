@@ -1,0 +1,23 @@
+drive_id: drive-01
+simulated: true                      # always true until real hardware is connected
+cloud_url: http://localhost:8000
+api_key: demo-key
+upload_every_s: 5                    # routine batch interval; alarms are sent immediately
+buffer_file: buffer.jsonl            # unsent data survives restarts here
+debounce_samples: 3                  # consecutive samples needed before a level change
+
+# Illustrative limits - NOT validated. current/power come from the FC-301 P4K0 datasheet.
+limits:
+  current:    {warn: 10.0, crit: 16.0}   # A
+  power:      {warn: 4.0,  crit: 6.4}    # kW
+  heatsink:   {warn: 65,   crit: 80}     # degC  (TBD: FC-301 manual)
+  motor_temp: {warn: 80,   crit: 100}    # degC  (TBD: motor nameplate)
+  vib_rms:    {warn: 1.8,  crit: 4.5}    # mm/s  (ISO 10816-1 small machines - verify)
+
+# Values outside these ranges are treated as sensor/read errors and dropped.
+plausible:
+  current: [0, 40]
+  power: [0, 15]
+  heatsink: [-10, 120]
+  motor_temp: [-10, 200]
+  vib_rms: [0, 50]

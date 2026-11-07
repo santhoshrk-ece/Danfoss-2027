@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: drive-monitoring-demo
+    runtime: python
+    plan: free
+    rootDir: cloud
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        sync: false          # paste the Supabase pooler connection string in the Render dashboard
+      - key: API_KEY
+        generateValue: true  # copy the generated value into edge/config.yaml
