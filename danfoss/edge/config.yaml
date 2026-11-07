@@ -1,7 +1,7 @@
 drive_id: drive-01
 simulated: true                      # always true until real hardware is connected
-cloud_url: http://localhost:8000
-api_key: demo-key
+cloud_url: https://drive-monitoring-demo.onrender.com
+api_key: PQleXwitC10KZ7wSSBWilP8HbeXDYJMm
 upload_every_s: 5                    # routine batch interval; alarms are sent immediately
 buffer_file: buffer.jsonl            # unsent data survives restarts here
 debounce_samples: 3                  # consecutive samples needed before a level change
