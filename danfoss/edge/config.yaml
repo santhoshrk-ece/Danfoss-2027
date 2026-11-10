@@ -1,5 +1,5 @@
-cloud_url: http://localhost:8000     # replace with your Render URL
-api_key: demo-key                    # must equal API_KEY in Render
+cloud_url: https://drive-monitoring-demo.onrender.com    # replace with your Render URL
+api_key: PQleXwitC10KZ7wSSBWilP8HbeXDYJMm                   # must equal API_KEY in Render
 simulated: true                      # always true until real hardware is connected
 upload_every_s: 5                    # routine batch interval; alarms are sent immediately
 debounce_samples: 3
