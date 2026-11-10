@@ -1,23 +1,27 @@
-drive_id: drive-01
+cloud_url: http://localhost:8000     # replace with your Render URL
+api_key: demo-key                    # must equal API_KEY in Render
 simulated: true                      # always true until real hardware is connected
-cloud_url: https://drive-monitoring-demo.onrender.com
-api_key: PQleXwitC10KZ7wSSBWilP8HbeXDYJMm
 upload_every_s: 5                    # routine batch interval; alarms are sent immediately
-buffer_file: buffer.jsonl            # unsent data survives restarts here
-debounce_samples: 3                  # consecutive samples needed before a level change
+debounce_samples: 3
 
-# Illustrative limits - NOT validated. current/power come from the FC-301 P4K0 datasheet.
+# Instant edge limits (illustrative, NOT validated). Cloud health scoring uses its own time-aware rules.
 limits:
-  current:    {warn: 10.0, crit: 16.0}   # A
+  current:    {warn: 10.0, crit: 16.0}   # A   (datasheet: rated / 160% overload)
   power:      {warn: 4.0,  crit: 6.4}    # kW
-  heatsink:   {warn: 65,   crit: 80}     # degC  (TBD: FC-301 manual)
-  motor_temp: {warn: 80,   crit: 100}    # degC  (TBD: motor nameplate)
-  vib_rms:    {warn: 1.8,  crit: 4.5}    # mm/s  (ISO 10816-1 small machines - verify)
-
-# Values outside these ranges are treated as sensor/read errors and dropped.
+  heatsink:   {warn: 65,   crit: 80}     # degC (TBD: FC-301 manual)
+  motor_temp: {warn: 90,   crit: 110}    # degC (TBD: motor nameplate / insulation class)
+  vib_rms:    {warn: 1.8,  crit: 4.5}    # mm/s (ISO 10816-1 small machines - verify)
 plausible:
   current: [0, 40]
   power: [0, 15]
   heatsink: [-10, 120]
   motor_temp: [-10, 200]
   vib_rms: [0, 50]
+
+# One entry = one simulated gateway/drive. profile: healthy | wear | overload | fouling
+drives:
+  - {id: drive-01, name: "Pump 1",     profile: healthy,  rated_a: 10.0, rated_kw: 4.0}
+  - {id: drive-02, name: "Fan 2",      profile: wear,     rated_a: 10.0, rated_kw: 4.0, fault_after_s: 1800, fault_growth_s: 1800}
+  - {id: drive-03, name: "Conveyor 3", profile: overload, rated_a: 10.0, rated_kw: 4.0}
+  - {id: drive-04, name: "Mixer 4",    profile: healthy,  rated_a: 10.0, rated_kw: 4.0, network: {flaky: true}}
+    # network also accepts fixed outages, e.g. {outages: [[60, 30]]} = cut 60 s after start for 30 s

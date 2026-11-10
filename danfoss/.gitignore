@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.db
+buffer_*.jsonl
+ground_truth.jsonl
+live_eval_results.csv
+check_sim.png
+.env

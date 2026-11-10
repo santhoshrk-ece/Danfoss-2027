@@ -10,82 +10,96 @@
 header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 24px;background:var(--ink);color:#fff}
 header h1{font-size:18px;margin:0;font-weight:600;flex:1}
 .badge{background:#f2c14e;color:#16212b;padding:3px 10px;border-radius:3px;font-weight:600;font-size:12px}
-#conn{font-size:12px;opacity:.85}
-main{display:grid;grid-template-columns:300px 1fr;gap:16px;padding:16px 24px;max-width:1400px;margin:auto}
-@media(max-width:860px){main{grid-template-columns:1fr;padding:12px}}
+main{max-width:1400px;margin:auto;padding:16px 24px}
 h2{font-size:13px;margin:0 0 8px;font-weight:600;color:var(--mut)}
-.fleet{display:flex;flex-direction:column;gap:8px}
-.drive{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--ok);padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
-.drive.sel{outline:2px solid var(--acc)}.drive:focus-visible{outline:2px solid var(--acc)}
-.drive.Watch{border-left-color:var(--warn)}.drive.Critical{border-left-color:var(--crit)}.drive.Unknown{border-left-color:var(--stale);opacity:.8}
-.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.score{font:500 26px "IBM Plex Mono",monospace}
-.pill{font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;color:#fff;background:var(--ok)}
-.pill.Watch{background:var(--warn)}.pill.Critical{background:var(--crit)}.pill.Unknown{background:var(--stale)}
-.mut{color:var(--mut);font-size:12px}
 .panel{background:var(--panel);border:1px solid var(--line);padding:12px;margin-bottom:12px}
-.hero{display:grid;grid-template-columns:200px 1fr;gap:16px}
-@media(max-width:700px){.hero{grid-template-columns:1fr}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--stale);padding:8px 12px}
+.kpi b{font:500 26px "IBM Plex Mono",monospace;display:block}.kpi.ok{border-top-color:var(--ok)}.kpi.warn{border-top-color:var(--warn)}.kpi.crit{border-top-color:var(--crit)}
+table{width:100%;border-collapse:collapse}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}th{color:var(--mut);font-weight:500}
+tr.drv{cursor:pointer}tr.drv:hover{background:#f3f6f8}tr.sel{background:#e3eef3}
+.pill{font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;color:#fff;background:var(--ok);white-space:nowrap}
+.pill.Watch,.pill.Delayed,.pill.learning{background:var(--warn)}.pill.Action,.pill.Offline{background:var(--crit)}.pill.Unknown{background:var(--stale)}
+.score{font:500 20px "IBM Plex Mono",monospace}.mut{color:var(--mut);font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.hero{display:grid;grid-template-columns:190px 1fr;gap:16px}@media(max-width:700px){.hero{grid-template-columns:1fr}}
 .big{font:500 64px/1 "IBM Plex Mono",monospace}
-.sig{display:grid;grid-template-columns:110px 1fr 90px;gap:8px;align-items:center;margin:4px 0;font-size:13px}
-.bar{height:10px;background:#e3e8ec}.bar i{display:block;height:100%}
-.trend{border-left:6px solid var(--ok);padding:8px 12px;margin-top:8px;background:#f6f8f9}.trend.flag{border-left-color:var(--warn)}
-.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
-.charts canvas{max-height:210px}
-table{width:100%;border-collapse:collapse}td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--mut);font-weight:500}
-td.CRITICAL{color:var(--crit);font-weight:600}td.WARNING{color:var(--warn);font-weight:600}td.INFO{color:var(--mut)}
-select{font:inherit;padding:3px 6px}
+.bar{display:grid;grid-template-columns:90px 1fr 40px;gap:8px;align-items:center;margin:3px 0;font-size:12px}.bar div{height:10px;background:#e3e8ec}.bar i{display:block;height:100%;background:var(--crit)}
+ul{margin:4px 0;padding-left:18px}li{margin:2px 0}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}.charts canvas{max-height:200px}
+td.CRITICAL,td.ANOMALY{color:var(--crit);font-weight:600}td.WARNING{color:var(--warn);font-weight:600}td.INFO,td.ANOMALY_CLEAR{color:var(--mut)}
+select{font:inherit;padding:3px 6px}.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 </style></head><body>
-<header><h1>Drive Monitoring - FC-301 fleet</h1><span class="badge">SIMULATED DATA</span><span id="conn">connecting...</span></header>
+<header><h1>Drive Monitoring - fleet overview</h1><span class="badge">SIMULATED DATA</span><span id="conn" class="mut" style="color:#cdd6dd">connecting...</span></header>
 <main>
-<section><h2>Drives (health score 0-100)</h2><div class="fleet" id="fleet"></div>
-<p class="mut">Score = weighted signal scores, capped when any signal is in warning (70) or critical (30). Healthy 80+, Watch 50-79, Critical below 50.</p></section>
-<section>
-<div class="panel hero"><div><div class="mut" id="title">Select a drive</div><div class="big" id="big">-</div><span class="pill" id="band">-</span>
-<div class="mut" id="seen" style="margin-top:6px"></div></div>
-<div><h2>What drives the score</h2><div id="sigs"></div><div class="trend" id="trend">Trend analysis appears here.</div><div class="mut" id="anom" style="margin-top:6px"></div></div></div>
-<div class="row"><h2>History</h2><select id="range"><option value="10">Last 10 min</option><option value="60">Last hour</option><option value="1440">Last 24 hours</option><option value="10080">Last 7 days (1-min averages)</option></select></div>
-<div class="charts">
-<div class="panel"><h2>Motor current (A)</h2><canvas id="c1"></canvas></div>
-<div class="panel"><h2>Vibration RMS (mm/s)</h2><canvas id="c2"></canvas></div>
-<div class="panel"><h2>Temperatures (°C)</h2><canvas id="c3"></canvas></div>
-<div class="panel"><h2>Power (kW)</h2><canvas id="c4"></canvas></div></div>
-<div class="panel"><h2>Alarm history</h2><table><thead><tr><th>Time</th><th>Level</th><th>Event</th></tr></thead><tbody id="ev"></tbody></table></div>
-</section></main>
+<div class="kpis" id="kpis"></div>
+<div class="grid2">
+<div class="panel"><h2>Drives (worst first) - click a row for details</h2><table><thead><tr><th>Drive</th><th>Health</th><th>State</th><th>Link</th><th>Anomaly</th><th>Vib vs peers</th><th>Current</th></tr></thead><tbody id="fleet"></tbody></table></div>
+<div class="panel"><h2>Health score by drive</h2><canvas id="cf" style="max-height:230px"></canvas>
+<p class="mut">Score = 100 − limit penalty (max 60) − anomaly penalty (max 25) − trend penalty (max 15). Healthy 85+, Watch 60-84, Action needed below 60.</p></div></div>
+<div id="detail"></div>
+</main>
 <script>
-const $=s=>document.querySelector(s);let sel=null,LIM=null,ch={};
+const $=s=>document.querySelector(s);let sel=null,ch={},LAST=null;
 const f=(v,d=1)=>v==null?'-':Number(v).toFixed(d);const j=async u=>{const r=await fetch(u);if(!r.ok)throw 0;return r.json()};
-const T=ts=>new Date(ts*1000).toLocaleString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',month:'short',day:'numeric'});
-const NAME={vib_rms:'Vibration RMS',current:'Current',motor_temp:'Motor temp',heatsink:'Heatsink',power:'Power'},UNIT={vib_rms:'mm/s',current:'A',motor_temp:'°C',heatsink:'°C',power:'kW'};
-const colr=s=>s>=80?'var(--ok)':s>=50?'var(--warn)':'var(--crit)';
-function chart(id,sets){return ch[id]||(ch[id]=new Chart($('#'+id),{type:'line',data:{labels:[],datasets:sets.map(s=>({label:s.l,borderColor:s.c,borderDash:s.d||[],borderWidth:s.d?1:2,pointRadius:0,tension:.2,data:[]}))},options:{animation:false,scales:{x:{ticks:{maxTicksLimit:6}}},plugins:{legend:{labels:{boxWidth:12}}}}}))}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const T=ts=>new Date(ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const TD=ts=>new Date(ts*1000).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const cls=b=>b==='Action needed'?'Action':b;
+const col=b=>b==='Healthy'?'#1b7f5c':b==='Watch'?'#c98300':b==='Action needed'?'#c8102e':'#8a97a3';
+function chart(id,sets,type='line'){return ch[id]||(ch[id]=new Chart($('#'+id),{type,data:{labels:[],datasets:sets.map(s=>({label:s.l,borderColor:s.c,backgroundColor:s.c,borderDash:s.d||[],borderWidth:s.d?1:2,pointRadius:0,tension:.2,data:[]}))},options:{animation:false,scales:{x:{ticks:{maxTicksLimit:6}}},plugins:{legend:{display:sets.length>1,labels:{boxWidth:12}}}}}))}
 function fill(c,L,S){c.data.labels=L;S.forEach((d,i)=>c.data.datasets[i].data=d);c.update('none')}
+function anomText(a){return a.status==='learning'?`<span class="pill learning">learning ${Math.round((a.progress||0)*100)}%</span>`:a.open.length?`<span class="pill Action">${esc(a.open.join(', '))}</span>`:'<span class="mut">none</span>'}
 async function tick(){
- let ds;try{ds=await j('/api/drives');$('#conn').textContent='cloud connected '+new Date().toLocaleTimeString()}catch(e){$('#conn').textContent='cloud unreachable (may be waking up)';return}
- if(!LIM)LIM=(await j('/api/config')).limits;
+ let F;try{F=await j('/api/fleet');$('#conn').textContent='cloud connected '+new Date().toLocaleTimeString()}catch(e){$('#conn').textContent='cloud unreachable (may be waking up)';return}
+ const k=F.kpi,b=k.bands;
+ $('#kpis').innerHTML=[['Drives',k.total,''],['Healthy',b.Healthy,'ok'],['Watch',b.Watch,b.Watch?'warn':''],['Action needed',b['Action needed'],b['Action needed']?'crit':''],['Offline',k.offline,k.offline?'crit':''],['Open anomalies',k.anomalies,k.anomalies?'warn':'']].map(([n,v,c])=>`<div class="kpi ${c}"><span class="mut">${n}</span><b>${v}</b></div>`).join('');
+ const ds=[...F.drives].sort((x,y)=>(x.health?x.health.score:-1)-(y.health?y.health.score:-1));
  if(!sel&&ds.length)sel=ds[0].drive_id;
- $('#fleet').innerHTML=ds.map(d=>{const b=d.health?d.health.band:'Unknown';return `<button class="drive ${b} ${d.drive_id===sel?'sel':''}" data-id="${d.drive_id}">
-  <div class="row"><b>${d.drive_id}</b><span class="pill ${b}">${b}</span></div>
-  <div class="row"><span class="score">${d.health?d.health.score:'-'}</span><span class="mut">${d.last.state} · ${f(d.last.current)} A</span></div>
-  <div class="mut">10-min avg (run): ${f(d.avg_current)} A · ${f(d.avg_vib,2)} mm/s</div></button>`}).join('');
- document.querySelectorAll('.drive').forEach(b=>b.onclick=()=>{sel=b.dataset.id;tick()});
- const d=ds.find(x=>x.drive_id===sel);if(!d)return;const h=d.health,b=h?h.band:'Unknown';
- $('#title').textContent=d.drive_id+(d.stale?' - no recent data, last values are old':'');
- $('#big').textContent=h?h.score:'-';$('#band').textContent=b;$('#band').className='pill '+b;
- $('#seen').textContent='last data received '+f(d.age_s,0)+' s ago';
- $('#sigs').innerHTML=h?Object.entries(h.signals).map(([k,s])=>`<div class="sig"><span>${NAME[k]}</span><div class="bar"><i style="width:${s.score}%;background:${colr(s.score)}"></i></div><span class="mut">${f(s.value,2)} ${UNIT[k]}</span></div>`).join('')
-   +(h.cap?`<div class="mut">Score capped at ${h.cap} because a signal is beyond its limit (plain average: ${h.average}).</div>`:'')
-   +(h.trend_penalty?`<div class="mut">Trend penalty: -${h.trend_penalty}</div>`:''):'<div class="mut">Waiting for recent data.</div>';
- $('#trend').className='trend'+(d.trend.flag?' flag':'');$('#trend').innerHTML='<b>Trend analysis (30 min):</b> '+d.trend.note;
- const z=d.anomaly;$('#anom').textContent=Object.keys(z).length?'Deviation from this drive\'s own baseline (z-score): '+Object.entries(z).map(([k,v])=>`${NAME[k]} ${v>0?'+':''}${v}`).join(' · ')+(Object.values(z).some(v=>Math.abs(v)>3)?' - unusual (|z| > 3)':''):'Baseline still being learned (needs 300 run-state readings).';
- const m=$('#range').value;
- const [hist,ev]=await Promise.all([j('/api/history?drive_id='+sel+'&minutes='+m),j('/api/events?drive_id='+sel)]);
- const L=hist.map(r=>T(r.ts)),col=k=>hist.map(r=>r[k]),line=v=>hist.map(()=>v);
- fill(chart('c1',[{l:'current',c:'#0b5c7a'},{l:'warning',c:'#c98300',d:[5,4]},{l:'critical',c:'#c8102e',d:[5,4]}]),L,[col('current'),line(LIM.current.warn),line(LIM.current.crit)]);
- fill(chart('c2',[{l:'vib RMS',c:'#0b5c7a'},{l:'warning',c:'#c98300',d:[5,4]},{l:'critical',c:'#c8102e',d:[5,4]}]),L,[col('vib_rms'),line(LIM.vib_rms.warn),line(LIM.vib_rms.crit)]);
- fill(chart('c3',[{l:'heatsink',c:'#0b5c7a'},{l:'motor',c:'#7a3b0b'}]),L,[col('heatsink'),col('motor_temp')]);
- fill(chart('c4',[{l:'power',c:'#0b5c7a'},{l:'rated 4.0 kW',c:'#c98300',d:[5,4]}]),L,[col('power'),line(4)]);
- $('#ev').innerHTML=ev.length?ev.map(e=>`<tr><td>${T(e.ts)}</td><td class="${e.severity}">${e.severity}</td><td>${e.msg}</td></tr>`).join(''):'<tr><td colspan="3" class="mut">No events yet.</td></tr>';
+ $('#fleet').innerHTML=ds.map(d=>{const h=d.health,bd=h?h.band:'Unknown';return `<tr class="drv ${d.drive_id===sel?'sel':''}" data-id="${esc(d.drive_id)}"><td><b>${esc(d.name)}</b><div class="mut">${esc(d.drive_id)}</div></td>
+  <td><span class="score">${h?h.score:'-'}</span> <span class="pill ${cls(bd)}">${bd}</span>${d.confidence==='low'?'<div class="mut">low confidence (gaps in data)</div>':''}</td>
+  <td>${esc(d.state)}</td><td><span class="pill ${d.link}">${d.link}</span><div class="mut">${Math.round(d.completeness_5m*100)}% complete (5 min)</div></td>
+  <td>${anomText(d.anomaly)}</td><td>${d.peer_ratio!=null?d.peer_ratio+'×':'-'}</td><td>${f(d.last.current)} A</td></tr>`}).join('');
+ document.querySelectorAll('tr.drv').forEach(r=>r.onclick=()=>{sel=r.dataset.id;tick()});
+ const c=chart('cf',[{l:'score',c:'#0b5c7a'}],'bar');c.options.scales.y={min:0,max:100};
+ c.data.datasets[0].backgroundColor=ds.map(d=>col(d.health?d.health.band:'Unknown'));fill(c,ds.map(d=>d.name),[ds.map(d=>d.health?d.health.score:0)]);
+ if(sel)await detail(sel);
 }
-$('#range').onchange=tick;tick();setInterval(tick,3000);
+async function detail(id){
+ const m=$('#range')?$('#range').value:'10';
+ const [d,hist,ev]=await Promise.all([j('/api/drive/'+id),j('/api/history?drive_id='+id+'&minutes='+m),j('/api/events?drive_id='+id+'&limit=40')]);
+ const h=d.health,bd=h?h.band:'Unknown',cm=d.comms,ed=d.edge;
+ const pen=(n,v,mx)=>`<div class="bar"><span>${n}</span><div><i style="width:${Math.min(100,100*v/mx)}%"></i></div><span>−${v}</span></div>`;
+ const tr=Object.entries(d.trend.detail||{}).map(([s,w])=>Object.entries(w).map(([n,a])=>`<tr><td>${esc(s)}</td><td>${n}</td><td>${a.ok?(a.significant?'<b>rising</b>':'no significant trend'):'<span class="mut">'+esc(a.note)+'</span>'}</td><td>${a.ok?f(a.slope_per_h,3)+'/h':'-'}</td><td>${a.ok?a.p:'-'}</td><td>${a.eta_h!=null?'~'+a.eta_h+' h':'-'}</td></tr>`).join('')).join('');
+ const z=Object.entries(d.anomaly.z||{}).map(([s,v])=>`${esc(s)} z=${v>0?'+':''}${v}`).join(' · ');
+ const gaps=(cm.gaps||[]).map(g=>`<li>${TD(g.start)} → ${g.ongoing?'now (ongoing)':TD(g.end)}: <b>${g.seconds} s of data lost</b> (edge/power offline)</li>`).join('');
+ const rec=(cm.recovered||[]).map(g=>`<li>${TD(g.start)}: <b>${g.n} readings recovered</b> after a network outage (max delay ${g.max_delay_s} s)</li>`).join('');
+ const al=cm.alert_latency||{};
+ $('#detail').innerHTML=`<div class="panel hero"><div><div class="mut">${esc(d.name)} · ${esc(d.drive_id)} · ${esc(d.model||'')}</div><div class="big">${h?h.score:'-'}</div><span class="pill ${cls(bd)}">${bd}</span>
+  <div class="mut" style="margin-top:6px">${d.link} · last data ${f(d.age_s,0)} s ago</div></div>
+  <div><h2>Why this score</h2>${h?pen('Limits',h.p_limit,60)+pen('Anomaly',h.p_anomaly,25)+pen('Trend',h.p_trend,15):'<span class="mut">No recent data - score not shown (never display an old score as current).</span>'}
+  <ul>${h?(h.reasons.length?h.reasons.map(r=>`<li>−${r.penalty} <span class="mut">${r.kind}</span> ${esc(r.text)}</li>`).join(''):'<li>No penalties: all signals normal for this drive.</li>'):''}</ul></div></div>
+ <div class="grid2">
+ <div class="panel"><h2>Anomaly detection (compared with this drive's own normal, per load)</h2>
+  <p>${d.anomaly.status==='learning'?`Learning baseline: ${Math.round((d.anomaly.progress||0)*100)}% (first ${Math.round(d.learning.warmup_s/60)} min warm-up ignored, next ${Math.round(d.learning.learn_s/60)} min assumed healthy).`:d.anomaly.open.length?'<b>Open anomaly:</b> '+esc(d.anomaly.open.join(', '))+'<br><span class="mut">'+z+'</span>':'No anomaly. Baseline active.'}</p>
+  <p class="mut">Vibration: robust z-score per load bin. Temperatures: hotter than a thermal model of the recent current predicts. An anomaly must persist before it is raised. Vibration vs fleet median: ${d.peer_ratio!=null?d.peer_ratio+'×':'n/a (needs ≥3 drives)'}.</p></div>
+ <div class="panel"><h2>Communication reliability (last 60 min)</h2>
+  <table><tr><td>Link</td><td><span class="pill ${d.link}">${d.link}</span></td><td>Data completeness</td><td><b>${Math.round(cm.completeness*100)}%</b> (${cm.received}/${cm.expected} s)</td></tr>
+  <tr><td>Delivery latency</td><td>mean ${f(cm.latency_mean_s,1)} s · p95 ${f(cm.latency_p95_s,1)} s</td><td>Alert latency (edge→cloud)</td><td>${al.n?f(al.mean_s,1)+' s mean · '+al.n+' alerts':'-'}</td></tr>
+  <tr><td>Edge buffer</td><td>${ed?ed.buffer_depth+' readings':'-'}</td><td>Upload failures</td><td>${ed?ed.failures:'-'} ${ed?'· uptime '+Math.round(ed.uptime_s/60)+' min':''}</td></tr></table>
+  <ul>${gaps}${rec}${!gaps&&!rec?'<li class="mut">No gaps or recoveries in this window.</li>':''}</ul></div></div>
+ <div class="panel"><h2>Trend analysis (load-matched medians, Theil-Sen slope, Mann-Kendall test)</h2><table><thead><tr><th>Signal</th><th>Window</th><th>Result</th><th>Slope</th><th>p</th><th>Indicative time to warning</th></tr></thead><tbody>${tr||'<tr><td colspan="6" class="mut">Collecting data...</td></tr>'}</tbody></table>
+  <p class="mut">A rising trend is an indicator, not a diagnosis or a failure prediction.</p></div>
+ <div class="row"><h2>History</h2><select id="range"><option value="10">Last 10 min</option><option value="60">Last hour</option><option value="1440">Last 24 hours</option><option value="10080">Last 7 days (1-min averages)</option></select></div>
+ <div class="charts"><div class="panel"><h2>Motor current (A)</h2><canvas id="c1"></canvas></div><div class="panel"><h2>Vibration RMS (mm/s)</h2><canvas id="c2"></canvas></div>
+ <div class="panel"><h2>Temperatures (°C)</h2><canvas id="c3"></canvas></div><div class="panel"><h2>Power (kW)</h2><canvas id="c4"></canvas></div></div>
+ <div class="panel"><h2>Event history</h2><table><thead><tr><th>Time</th><th>Level</th><th>Event</th><th>Alert latency</th></tr></thead><tbody>${ev.length?ev.map(e=>`<tr><td>${TD(e.ts)}</td><td class="${esc(e.severity)}">${esc(e.severity)}</td><td>${esc(e.msg)}</td><td class="mut">${f(e.rec-e.ts,1)} s</td></tr>`).join(''):'<tr><td colspan="4" class="mut">No events.</td></tr>'}</tbody></table></div>`;
+ $('#range').value=m;$('#range').onchange=tick;['c1','c2','c3','c4'].forEach(k=>{if(ch[k])ch[k].destroy();ch[k]=null});
+ const L=hist.map(r=>TD(r.ts)),cc=k=>hist.map(r=>r[k]),ln=v=>hist.map(()=>v),lim=d.limits;
+ fill(chart('c1',[{l:'current',c:'#0b5c7a'},{l:'rated',c:'#c98300',d:[5,4]},{l:'160%',c:'#c8102e',d:[5,4]}]),L,[cc('current'),ln(lim.current.warn),ln(lim.current.crit)]);
+ fill(chart('c2',[{l:'vib RMS',c:'#0b5c7a'},{l:'warning',c:'#c98300',d:[5,4]},{l:'critical',c:'#c8102e',d:[5,4]}]),L,[cc('vib_rms'),ln(lim.vib_rms.warn),ln(lim.vib_rms.crit)]);
+ fill(chart('c3',[{l:'heatsink',c:'#0b5c7a'},{l:'motor',c:'#7a3b0b'}]),L,[cc('heatsink'),cc('motor_temp')]);
+ fill(chart('c4',[{l:'power',c:'#0b5c7a'},{l:'rated',c:'#c98300',d:[5,4]}]),L,[cc('power'),ln(lim.power.warn)]);
+}
+tick();setInterval(tick,4000);
 </script></body></html>
